@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AoS Army Calculator</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        textarea { width: 80%; height: 150px; }
+        button { margin: 10px; padding: 10px; font-size: 16px; }
+        #unitSummary { margin-top: 20px; text-align: left; display: inline-block; }
+    </style>
+</head>
+<body>
+    <h1>Age of Sigmar Army Calculator</h1>
+    <p>Paste your army export:</p>
+    <textarea id="armyList" placeholder="Paste your army list from the AoS app here"></textarea>
+    <br>
+    <button onclick="calculateCost()">Calculate Cost</button>
+    <h2>Total: <span id="totalPoints">0</span> points</h2>
+    <h2>Total Cost: $<span id="totalPrice">0</span></h2>
+    <div id="unitSummary"></div>
+    
+    <script>
+        const unitData = {
+           "Arkanaut Admiral": { "points": 160, "price": 35 },
+			"Arkanaut Company": { "points": 100, "price": 40 },
+			"Arkanaut Frigate": { "points": 320, "price": 90 },
+			"Endrinriggers": { "points": 120, "price": 50 },
+			"Grundstock Gunhauler": { "points": 160, "price": 45 },
+			"Aether-Khemist": { "points": 130, "price": 38 },
+			"Aetheric Navigator": { "points": 130, "price": 38 },
+			"Brokk Grungsson, Lord-Magnate of Barak-Nar": { "points": 250, "price": 55 },
+			"Codewright": { "points": 80, "price": 30 },
+			"Drekki Flynt": { "points": 150, "price": 40 },
+			"Endrinmaster with Dirigible Suit": { "points": 180, "price": 45 },
+			"Endrinmaster with Endrinharness": { "points": 130, "price": 35 },
+			"Arkanaut Ironclad": { "points": 500, "price": 120 },
+			"Grundstok Thunderers": { "points": 140, "price": 45 },
+			"Skywardens": { "points": 130, "price": 50 }
+        };
+
+        function parseArmyList(text) {
+            const lines = text.split("\n").map(line => line.trim());
+            const units = [];
+
+            lines.forEach((line, index) => {
+                const match = line.match(/^(.*)\s*\((\d+)\)$/);
+                if (match) {
+                    const unitName = match[1].trim();
+                    let unitPoints = unitData[unitName] ? unitData[unitName].points : 0;
+                    let unitPrice = unitData[unitName] ? unitData[unitName].price : 0;
+                    const isReinforced = lines[index + 1] && lines[index + 1].toLowerCase().includes("reinforced");
+                    
+                    if (unitData[unitName]) {
+                        units.push({ name: unitName, points: unitPoints, price: unitPrice });
+                        if (isReinforced) {
+                            units.push({ name: unitName, points: unitPoints, price: unitPrice });
+                        }
+                    } else {
+                        console.warn(`Units not found: ${unitName}`);
+                    }
+                }
+            });
+
+            return units;
+        }
+
+        function calculateCost() {
+            const inputText = document.getElementById("armyList").value;
+            const unitList = parseArmyList(inputText);
+            let totalPoints = 0;
+            let totalPrice = 0;
+            let summaryHTML = "<h3>Unit Summary:</h3><ul>";
+
+            unitList.forEach(unit => {
+                totalPoints += unit.points;
+                totalPrice += unit.price;
+                summaryHTML += `<li>${unit.name} - ${unit.points} pts, $${unit.price}</li>`;
+            });
+            
+            summaryHTML += "</ul>";
+            document.getElementById("totalPoints").textContent = totalPoints;
+            document.getElementById("totalPrice").textContent = totalPrice;
+            document.getElementById("unitSummary").innerHTML = summaryHTML;
+        }
+    </script>
+</body>
+</html>
