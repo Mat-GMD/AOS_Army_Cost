@@ -18,7 +18,7 @@
     <br>
     <button onclick="calculateCost()">Calculate Cost</button>
     <h2>Total: <span id="totalPoints">0</span> points</h2>
-    <h2>Total Cost: $<span id="totalPrice">0</span></h2>
+    <h2>Total Cost: <span id="totalPrice">0</span> $</h2>
     <div id="unitSummary"></div>
     
     <script>
@@ -76,12 +76,12 @@
             unitList.forEach(unit => {
                 totalPoints += unit.points;
                 totalPrice += unit.price;
-                summaryHTML += `<li>${unit.name} - ${unit.points} pts, $${unit.price}</li>`;
+                summaryHTML += `<li>${unit.name} - ${unit.points} pts, ${unit.price.toFixed(2)} $</li>`;
             });
             
             summaryHTML += "</ul>";
             document.getElementById("totalPoints").textContent = totalPoints;
-            document.getElementById("totalPrice").textContent = totalPrice;
+            document.getElementById("totalPrice").textContent = totalPrice.toFixed(2);
             document.getElementById("unitSummary").innerHTML = summaryHTML;
         }
     </script>
