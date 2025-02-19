@@ -4,34 +4,74 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AoS Army Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
-        textarea { width: 80%; height: 150px; }
-        button { margin: 10px; padding: 10px; font-size: 16px; }
-        #unitSummary { margin-top: 20px; text-align: left; display: inline-block; }
-        .crossed { text-decoration: line-through; }
-        .kharadron { color: purple; }
-        .fyreslayer { color: orange; }
-        .orruks { color: green; }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #1e1e2e;
+            color: #ffffff;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: #282a36;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            border-radius: 5px;
+            border: none;
+            padding: 10px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #6272a4;
+            border: none;
+            padding: 10px 15px;
+            color: white;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover {
+            background-color: #50fa7b;
+        }
+        .unit-summary {
+            text-align: left;
+            background: #44475a;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        .crossed { text-decoration: line-through; color: #ff5555; }
+        .kharadron { color: #bd93f9; }
+        .fyreslayer { color: #ffb86c; }
+        .orruks { color: #50fa7b; }
     </style>
 </head>
 <body>
-    <h1>Age of Sigmar Army Calculator</h1>
-    <p>Supported Army : 
-        <span class="kharadron">Kharadron Overlords</span>, 
-        <span class="fyreslayer">Fyreslayer</span>, 
-        <span class="orruks">Orruks Warclans</span>
-    </p>
-    <p>Paste your army export:</p>
-    <textarea id="armyList" placeholder="Paste your army list from the AoS app here"></textarea>
-    <br>
-    <button onclick="calculateCost()">Calculate Cost</button>
-    <h2>Total: <span id="totalPoints">0</span> points</h2>
-    <h2>Total Cost: <span id="totalPrice">0</span> $</h2>
-    <h2>Cost per Point: <span id="costPerPoint">0</span> $/pt</h2>
-    <div id="unitSummary"></div>
-    <h3>Recent Lists</h3>
-    <div id="history"></div>
+	<div class="container">
+	    <h1>Age of Sigmar Army Calculator</h1>
+	    <p>Supported Army : 
+	        <span class="kharadron">Kharadron Overlords</span>, 
+	        <span class="fyreslayer">Fyreslayer</span>, 
+	        <span class="orruks">Orruks Warclans</span>
+	    </p>
+	    <textarea id="armyList" placeholder="Paste your army list here"></textarea>
+	    <button onclick="calculateCost()">Calculate Cost</button>
+	    <h2>Total: <span id="totalPoints">0</span> points</h2>
+	    <h2>Total Cost: <span id="totalPrice">0</span> $</h2>
+	    <h2>Cost per Point: <span id="costPerPoint">0</span> $/pt</h2>
+	    <div class="unit-summary" id="unitSummary"></div>
+	    <h3>Recent Lists</h3>
+	    <div id="history"></div>
+	</div>
     
     <script>
        const unitData = {
