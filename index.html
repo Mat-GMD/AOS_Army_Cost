@@ -33,6 +33,7 @@
             background-color: #6272a4;
             border: none;
             padding: 10px 15px;
+	    margin-top: 5px;
             color: white;
             font-size: 16px;
             border-radius: 5px;
@@ -205,17 +206,23 @@
             updateSummary();
         }
 
-        function saveToHistory(text) {
-            let history = JSON.parse(localStorage.getItem("armyHistory")) || [];
-            history.unshift({ text, summary: generateSummary(text) });
-            history = history.slice(0, 3);
-            localStorage.setItem("armyHistory", JSON.stringify(history));
-            loadHistory();
-        }
+	function detectFaction(text) {
+	    if (text.toLowerCase().includes("kharadron")) return "Kharadron Overlords";
+	    if (text.toLowerCase().includes("fyreslayer")) return "Fyreslayer";
+	    if (text.toLowerCase().includes("orruk")) return "Orruks Warclans";
+	    return "Unknown Faction";
+	}
 
-        function generateSummary(text) {
-            const lines = text.split("\n").filter(line => line.trim().length > 0);
-            return lines.slice(0, 3).join(", ") + (lines.length > 3 ? "..." : "");
+        function saveToHistory(text) {
+            let totalPoints = unitList.reduce((sum, unit) => sum + unit.points, 0);
+	    let totalPrice = unitList.reduce((sum, unit) => sum + unit.price, 0);
+	    let faction = detectFaction(text);
+	
+	    let history = JSON.parse(localStorage.getItem("armyHistory")) || [];
+	    history.unshift({ text, faction, totalPoints, totalPrice });
+	    history = history.slice(0, 3);
+	    localStorage.setItem("armyHistory", JSON.stringify(history));
+	    loadHistory();
         }
 
         function loadHistory() {
@@ -223,8 +230,10 @@
             const historyDiv = document.getElementById("history");
             historyDiv.innerHTML = "";
             history.forEach((item, index) => {
-                historyDiv.innerHTML += `<button onclick="loadFromHistory(${index})">Load List ${index + 1}: ${item.summary}</button><br>`;
-            });
+	        historyDiv.innerHTML += `<button onclick="loadFromHistory(${index})">
+	            ${item.faction} - ${item.totalPoints} pts - $${item.totalPrice.toFixed(2)}
+	        </button><br>`;
+	    });
         }
 
         function loadFromHistory(index) {
