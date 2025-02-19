@@ -9,20 +9,32 @@
         textarea { width: 80%; height: 150px; }
         button { margin: 10px; padding: 10px; font-size: 16px; }
         #unitSummary { margin-top: 20px; text-align: left; display: inline-block; }
+        .crossed { text-decoration: line-through; }
+        .kharadron { color: purple; }
+        .fyreslayer { color: orange; }
+        .orruks { color: green; }
     </style>
 </head>
 <body>
     <h1>Age of Sigmar Army Calculator</h1>
+    <p>Supported Army : 
+        <span class="kharadron">Kharadron Overlords</span>, 
+        <span class="fyreslayer">Fyreslayer</span>, 
+        <span class="orruks">Orruks Warclans</span>
+    </p>
     <p>Paste your army export:</p>
     <textarea id="armyList" placeholder="Paste your army list from the AoS app here"></textarea>
     <br>
     <button onclick="calculateCost()">Calculate Cost</button>
     <h2>Total: <span id="totalPoints">0</span> points</h2>
     <h2>Total Cost: <span id="totalPrice">0</span> $</h2>
+    <h2>Cost per Point: <span id="costPerPoint">0</span> $/pt</h2>
     <div id="unitSummary"></div>
+    <h3>Recent Lists</h3>
+    <div id="history"></div>
     
     <script>
-        const unitData = {
+       const unitData = {
            	"Arkanaut Admiral": { "points": 160, "price": 40 },
 			"Arkanaut Company": { "points": 100, "price": 70 },
 			"Arkanaut Frigate": { "points": 320, "price": 112 },
@@ -92,9 +104,11 @@
 		        "Marshcrawla Sloggoth": { "points": 150, "price": 70 }
         };
 
+        let unitList = [];
+
         function parseArmyList(text) {
             const lines = text.split("\n").map(line => line.trim());
-            const units = [];
+            unitList = [];
 
             lines.forEach((line, index) => {
                 const match = line.match(/^(.*)\s*\((\d+)\)$/);
@@ -105,37 +119,83 @@
                     const isReinforced = lines[index + 1] && lines[index + 1].toLowerCase().includes("reinforced");
                     
                     if (unitData[unitName]) {
-                        units.push({ name: unitName, points: unitPoints, price: unitPrice });
+                        unitList.push({ name: unitName, points: unitPoints, price: unitPrice, checked: false });
                         if (isReinforced) {
-                            units.push({ name: unitName, points: unitPoints, price: unitPrice });
+                            unitList.push({ name: unitName, points: unitPoints, price: unitPrice, checked: false });
                         }
                     } else {
                         console.warn(`Units not found: ${unitName}`);
                     }
                 }
             });
-
-            return units;
         }
 
         function calculateCost() {
             const inputText = document.getElementById("armyList").value;
-            const unitList = parseArmyList(inputText);
+            parseArmyList(inputText);
+            updateSummary();           
+            saveToHistory(inputText);
+        }
+        
+         function updateSummary() {
             let totalPoints = 0;
             let totalPrice = 0;
             let summaryHTML = "<h3>Unit Summary:</h3><ul>";
 
-            unitList.forEach(unit => {
-                totalPoints += unit.points;
-                totalPrice += unit.price;
-                summaryHTML += `<li>${unit.name} - ${unit.points} pts, ${unit.price.toFixed(2)} $</li>`;
+            unitList.forEach((unit, index) => {
+                if (!unit.checked) {
+                    totalPoints += unit.points;
+                    totalPrice += unit.price;
+                }
+                summaryHTML += `<li>
+                    <input type="checkbox" onchange="toggleUnit(${index})" ${unit.checked ? "checked" : ""}>
+                    <span class="${unit.checked ? "crossed" : ""}">${unit.name} - ${unit.points} pts, ${unit.price.toFixed(2)} $</span>
+                </li>`;
             });
             
             summaryHTML += "</ul>";
             document.getElementById("totalPoints").textContent = totalPoints;
             document.getElementById("totalPrice").textContent = totalPrice.toFixed(2);
+            document.getElementById("costPerPoint").textContent = totalPoints ? (totalPrice / totalPoints).toFixed(2) : "0";
             document.getElementById("unitSummary").innerHTML = summaryHTML;
         }
+
+        function toggleUnit(index) {
+            unitList[index].checked = !unitList[index].checked;
+            updateSummary();
+        }
+
+        function saveToHistory(text) {
+            let history = JSON.parse(localStorage.getItem("armyHistory")) || [];
+            history.unshift({ text, summary: generateSummary(text) });
+            history = history.slice(0, 3);
+            localStorage.setItem("armyHistory", JSON.stringify(history));
+            loadHistory();
+        }
+
+        function generateSummary(text) {
+            const lines = text.split("\n").filter(line => line.trim().length > 0);
+            return lines.slice(0, 3).join(", ") + (lines.length > 3 ? "..." : "");
+        }
+
+        function loadHistory() {
+            const history = JSON.parse(localStorage.getItem("armyHistory")) || [];
+            const historyDiv = document.getElementById("history");
+            historyDiv.innerHTML = "";
+            history.forEach((item, index) => {
+                historyDiv.innerHTML += `<button onclick="loadFromHistory(${index})">Load List ${index + 1}: ${item.summary}</button><br>`;
+            });
+        }
+
+        function loadFromHistory(index) {
+            const history = JSON.parse(localStorage.getItem("armyHistory")) || [];
+            if (history[index]) {
+                document.getElementById("armyList").value = history[index].text;
+                calculateCost();
+            }
+        }
+
+        loadHistory();
     </script>
 </body>
 </html>
